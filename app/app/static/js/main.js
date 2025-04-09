@@ -52,4 +52,64 @@ function toggleDarkMode() {
 // Check for saved dark mode preference
 if (localStorage.getItem('darkMode') === 'true') {
     document.body.classList.add('dark-mode');
+}
+
+let currentData = null;
+
+async function loadFile(fileId) {
+    try {
+        const response = await fetch(`/get-file-data/${fileId}/`);
+        const data = await response.json();
+        currentData = data;
+        
+        // Show graph container
+        document.getElementById('graph-container').style.display = 'block';
+        
+        // Populate axis selectors
+        const columns = data.columns;
+        const xSelect = document.getElementById('x-axis');
+        const ySelect = document.getElementById('y-axis');
+        
+        xSelect.innerHTML = '';
+        ySelect.innerHTML = '';
+        
+        columns.forEach(column => {
+            xSelect.add(new Option(column, column));
+            ySelect.add(new Option(column, column));
+        });
+        
+        // Set default selections
+        if (columns.length >= 2) {
+            xSelect.value = columns[0];
+            ySelect.value = columns[1];
+        }
+        
+        updateGraph();
+    } catch (error) {
+        console.error('Error loading file:', error);
+        alert('Error loading file data');
+    }
+}
+
+function updateGraph() {
+    if (!currentData) return;
+    
+    const xAxis = document.getElementById('x-axis').value;
+    const yAxis = document.getElementById('y-axis').value;
+    const graphType = document.getElementById('graph-type').value;
+    
+    const trace = {
+        x: currentData.data[xAxis],
+        y: currentData.data[yAxis],
+        type: graphType,
+        mode: graphType === 'scatter' ? 'markers' : 'lines'
+    };
+    
+    const layout = {
+        title: `${yAxis} vs ${xAxis}`,
+        xaxis: { title: xAxis },
+        yaxis: { title: yAxis }
+    };
+    
+    Plotly.newPlot('graph', [trace], layout);
 } 

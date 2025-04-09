@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Django App</title>
+    <title>CSV Analyzer</title>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="{% static 'js/main.js' %}" defer></script>
 </head>
 <body>
     <header>
-        <h1>Welcome to My Django App</h1>
+        <h1>CSV File Analyzer</h1>
         <nav>
             <ul>
-                <li><a href="">Home</a></li>
-                <li><a href="">About</a></li>
-                <li><a href="">Contact</a></li>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li><a href="{% url 'upload' %}">Upload</a></li>
             </ul>
         </nav>
     </header>
@@ -23,14 +23,51 @@
     <main>
         <section class="content">
             {% block content %}
-            <h2>Welcome!</h2>
-            <p>This is the main content area of your website.</p>
+            <div class="upload-section">
+                <h2>Upload CSV File</h2>
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="file-upload">
+                        <input type="file" name="csv_file" accept=".csv" required>
+                        <button type="submit">Upload</button>
+                    </div>
+                </form>
+            </div>
+
+            {% if files %}
+            <div class="files-section">
+                <h2>Available Files</h2>
+                <ul class="file-list">
+                    {% for file in files %}
+                    <li>
+                        <span>{{ file.name }}</span>
+                        <button onclick="loadFile('{{ file.id }}')">Load</button>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div id="graph-container" style="display: none;">
+                <h2>Data Visualization</h2>
+                <div class="graph-controls">
+                    <select id="x-axis"></select>
+                    <select id="y-axis"></select>
+                    <select id="graph-type">
+                        <option value="scatter">Scatter Plot</option>
+                        <option value="line">Line Graph</option>
+                        <option value="bar">Bar Chart</option>
+                    </select>
+                    <button onclick="updateGraph()">Generate Graph</button>
+                </div>
+                <div id="graph"></div>
+            </div>
             {% endblock %}
         </section>
     </main>
 
     <footer>
-        <p>&copy; 2024 My Django App. All rights reserved.</p>
+        <p>&copy; 2024 CSV Analyzer. All rights reserved.</p>
     </footer>
 </body>
 </html>
