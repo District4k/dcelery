@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Django App</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="{% static 'js/main.js' %}" defer></script>
+</head>
+<body>
+    <header>
+        <h1>Welcome to My Django App</h1>
+        <nav>
+            <ul>
+                <li><a href="">Home</a></li>
+                <li><a href="">About</a></li>
+                <li><a href="">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="content">
+            {% block content %}
+            <h2>Welcome!</h2>
+            <p>This is the main content area of your website.</p>
+            {% endblock %}
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 My Django App. All rights reserved.</p>
+    </footer>
+</body>
+</html>
