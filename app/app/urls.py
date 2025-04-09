@@ -21,4 +21,6 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
+    path('upload/', views.upload_file, name='upload'),
+    path('get-file-data/<int:file_id>/', views.get_file_data, name='get_file_data'),
 ]
