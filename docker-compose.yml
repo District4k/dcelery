@@ -1,0 +1,61 @@
+services:
+
+  redis:
+    image: redis:8.0-rc1-alpine
+
+  django:
+    container_name: django
+    build:
+      context: ./app
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./app:/usr/src/app/
+    ports:
+      - "8001:8000"
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=rugb3rg734yg3487hfw8f6843gf24hg92g
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+      - POSTGRES_DB=db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - REDIS_URL=redis://redis:6379/0
+
+  celery:
+    container_name: celery
+    build:
+      context: ./app
+    command: celery --app=app worker -l INFO
+    volumes:
+      - ./app:/usr/src/app/
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=rugb3rg734yg3487hfw8f6843gf24hg92g
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+      - POSTGRES_DB=db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - REDIS_URL=redis://redis:6379/0
+      - CELEERY_BACKEND=redis://redis:6379/0
+
+  db:
+    image: postgres:latest
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_DB: db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
