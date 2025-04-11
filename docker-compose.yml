@@ -24,7 +24,20 @@ services:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
       - REDIS_URL=redis://redis:6379/0
-
+  react:
+    container_name: react
+    build:
+      context: ./app/frontend/frontend
+    volumes:
+      - ./frontend/frontend:/app
+      - /app/node_modules
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - django
   celery:
     container_name: celery
     build:
@@ -57,22 +70,6 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-  react:
-    container_name: react
-    build:
-      context: ./csv-analyzer
-      dockerfile: Dockerfile
-    volumes:
-      - ./csv-analyzer:/app
-      - /app/node_modules
-    ports:
-      - "3001:3000"
-    environment:
-      - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
-    depends_on:
-      - django
 
 volumes:
   postgres_data:
