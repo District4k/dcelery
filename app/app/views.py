@@ -1,8 +1,16 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from .models import CSVFile
+from .serializers import CSVFileSerializer
 import pandas as pd
 import json
+
+class CSVFileListCreate(generics.ListCreateAPIView):
+    queryset = CSVFile.objects.all()
+    serializer_class = CSVFileSerializer
+
+    def perform_create(self. serializer):
+        serializer.save(name=self.request.FILES['file'].name)
 
 def home(request):
     files = CSVFile.objects.all().order_by('-uploaded_at')

@@ -16,9 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from .views import CSVFileListCreate
 from . import views
 
 urlpatterns = [
+    path('api/csvfile/', CSVFileListCreate.as_view(), name='csvfile-list-create'),
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     path('upload/', views.upload_file, name='upload'),

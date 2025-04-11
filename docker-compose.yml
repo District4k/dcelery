@@ -58,5 +58,21 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  react:
+    container_name: react
+    build:
+      context: ./csv-analyzer
+      dockerfile: Dockerfile
+    volumes:
+      - ./csv-analyzer:/app
+      - /app/node_modules
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - django
+
 volumes:
   postgres_data:
