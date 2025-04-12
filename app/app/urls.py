@@ -20,9 +20,5 @@ from .views import CSVFileListCreate
 from . import views
 
 urlpatterns = [
-    path('api/csvfile/', CSVFileListCreate.as_view(), name='csvfile-list-create'),
-    path('admin/', admin.site.urls),
-    path('', views.home, name='home'),
-    path('upload/', views.upload_file, name='upload'),
-    path('get-file-data/<int:file_id>/', views.get_file_data, name='get_file_data'),
+    path('api/upload-csv', CSVFileListCreate.as_view(), name='csvfile-list-create'),
 ]
