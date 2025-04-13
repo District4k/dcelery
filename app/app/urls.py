@@ -16,10 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import CSVFileListCreate
+from .views import CSVFileListCreate, TaskStatusView
 from . import views
 
 urlpatterns = [
     path('api/upload-csv', CSVFileListCreate.as_view(), name='csvfile-list-create'),
-    path('task-status/<task_id>/', TaskStatusView.as.view(), name='task-status')
+    path('task-status/<task_id>/', TaskStatusView.as_view(), name='task-status'),
 ]

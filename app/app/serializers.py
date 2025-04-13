@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from .models import CSVFile
+from .models import CSVRow
 
 class CSVFileSerializer(serializers.ModelSerializer):
     class Meta:
-        model = CSVFile
-        fields = ['id', 'name', 'file', 'uploaded_at']
+        model = CSVRow
+        fields = ['id', 'name', 'age']

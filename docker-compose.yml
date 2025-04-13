@@ -27,7 +27,7 @@ services:
   react:
     container_name: react
     build:
-      context: ./frontend/frontend
+      context: ./app/frontend/frontend
     volumes:
       - ./app/frontend/frontend:/app
       - /app/frontend/frontend/node_modules
