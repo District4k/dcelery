@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 
+const BASE_URL = 'http://0.0.0.0:8001'; // Use this URL if you're inside Docker, or `http://localhost:8000` for local React setup
+
 function App() {
   const [file, setFile] = useState(null);
   const [taskId, setTaskId] = useState(null);
@@ -9,30 +11,40 @@ function App() {
   const [columns, setColumns] = useState([]);
   const [selectedColumn, setSelectedColumn] = useState('');
 
-  // Upload CSV
   const handleUpload = async (e) => {
     e.preventDefault();
     if (!file) return;
-
+  
     const formData = new FormData();
-    formData.append('file', file);
-
-    const res = await fetch('http://localhost:8000/api/upload-csv/', {
-      method: 'POST',
-      body: formData,
-    });
-
-    const result = await res.json();
-    setTaskId(result.task_id);
-    setStatus('PENDING');
+    formData.append('csv_file', file); // Ensure this matches the Django field name
+  
+    try {
+      const res = await fetch('http://localhost:8000/api/csv/', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      if (res.ok) {
+        const result = await res.json();
+        setTaskId(result.task_id);
+        setStatus('PENDING');
+      } else {
+        console.error('Failed to upload file', res.status, res.statusText);
+        const errorData = await res.json();
+        console.error('Error response:', errorData);
+      }
+    } catch (error) {
+      console.error('Network Error:', error);
+    }
   };
+  
 
   // Poll task status
   useEffect(() => {
     if (!taskId) return;
 
     const interval = setInterval(async () => {
-      const res = await fetch(`http://localhost:8000/api/task-status/${taskId}/`);
+      const res = await fetch(`${BASE_URL}/api/task-status/${taskId}/`);
       const result = await res.json();
 
       setStatus(result.status);
