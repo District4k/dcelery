@@ -15,6 +15,14 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+CSRF_TRUSTED_ORIGINS = [
+    'http://0.0.0.0:3001',
+    'http://localhost:3001',
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://react:3000",
+]
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -51,6 +59,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -58,7 +67,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'app.urls'
@@ -141,4 +149,13 @@ STATICFILES_DIRS = [
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# CORS settings
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React development server
+    "http://127.0.0.1:3000",
+    "http://react:3000",
+]
+
+CORS_ALLOW_CREDENTIALS = True

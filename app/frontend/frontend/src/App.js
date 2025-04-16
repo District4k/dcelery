@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
 
-const BASE_URL = 'http://0.0.0.0:8001'; // Use this URL if you're inside Docker, or `http://localhost:8000` for local React setup
+const BASE_URL = 'http://0.0.0.0:8001';
 
 function App() {
   const [file, setFile] = useState(null);
@@ -10,49 +10,99 @@ function App() {
   const [data, setData] = useState([]);
   const [columns, setColumns] = useState([]);
   const [selectedColumn, setSelectedColumn] = useState('');
+  const [error, setError] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Helper function to get CSRF token
+  const getCookie = (name) => {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  };
+
+  // Helper function for API requests
+  const fetchWithCSRF = async (url, options = {}) => {
+    const defaultOptions = {
+      credentials: 'include',
+      headers: {
+        'X-CSRFToken': getCookie('csrftoken'),
+        ...options.headers,
+      },
+    };
+
+    return fetch(url, { ...defaultOptions, ...options });
+  };
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (!file) return;
-  
+    if (!file) {
+      setError('Please select a file first');
+      return;
+    }
+
+    setIsUploading(true);
+    setError(null);
     const formData = new FormData();
-    formData.append('csv_file', file); // Ensure this matches the Django field name
-  
+    formData.append('file', file);
+
     try {
-      const res = await fetch('http://localhost:8000/api/csv/', {
+      const res = await fetchWithCSRF(`${BASE_URL}/api/csv/`, {
         method: 'POST',
         body: formData,
       });
-  
+
+      const result = await res.json();
+
       if (res.ok) {
-        const result = await res.json();
         setTaskId(result.task_id);
         setStatus('PENDING');
+        console.log('Upload successful, task ID:', result.task_id);
       } else {
-        console.error('Failed to upload file', res.status, res.statusText);
-        const errorData = await res.json();
-        console.error('Error response:', errorData);
+        setError(result.error || 'Failed to upload file');
+        console.error('Upload failed:', result);
       }
     } catch (error) {
+      setError('Network error occurred');
       console.error('Network Error:', error);
+    } finally {
+      setIsUploading(false);
     }
   };
-  
 
-  // Poll task status
+  // Updated polling effect with better error handling
   useEffect(() => {
     if (!taskId) return;
 
     const interval = setInterval(async () => {
-      const res = await fetch(`${BASE_URL}/api/task-status/${taskId}/`);
-      const result = await res.json();
+      try {
+        const res = await fetchWithCSRF(`${BASE_URL}/api/task-status/${taskId}/`);
+        const result = await res.json();
 
-      setStatus(result.status);
+        setStatus(result.status);
+        console.log('Task status:', result.status);
 
-      if (result.status === 'SUCCESS') {
-        clearInterval(interval);
-        setData(result.data);
-        setColumns(Object.keys(result.data[0]));
+        if (result.status === 'SUCCESS' && result.data) {
+          clearInterval(interval);
+          setData(result.data.rows);
+          setColumns(result.data.columns);
+          console.log('Data loaded:', result.data);
+        } else if (result.status === 'FAILURE') {
+          clearInterval(interval);
+          setError(result.error || 'Task failed');
+          console.error('Task failed:', result.error);
+        }
+      } catch (error) {
+        console.error('Error checking task status:', error);
+        setError('Error checking task status');
       }
     }, 1000);
 
@@ -69,10 +119,23 @@ function App() {
           accept=".csv"
           onChange={(e) => setFile(e.target.files[0])}
         />
-        <button type="submit">Upload</button>
+        <button type="submit" disabled={isUploading}>
+          {isUploading ? 'Uploading...' : 'Upload'}
+        </button>
       </form>
 
-      {status && <p>Status: {status}</p>}
+      {error && (
+        <div style={{ color: 'red', margin: '1rem 0' }}>
+          Error: {error}
+        </div>
+      )}
+
+      {status && (
+        <div style={{ margin: '1rem 0' }}>
+          Status: {status}
+          {status === 'PENDING' && ' (Processing...)'}
+        </div>
+      )}
 
       {data.length > 0 && (
         <>
