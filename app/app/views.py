@@ -75,8 +75,11 @@ class CSVFileListCreate(ListCreateAPIView):
                 status='PENDING'
             )
             
+            # Get the absolute file path
+            file_path = file_obj.file.path
+            
             # Start the processing task
-            task = process_csv_file.delay(file_obj.id)
+            task = process_csv_file.delay(file_path, file_obj.id)
             file_obj.task_id = task.id
             file_obj.save()
             
@@ -92,6 +95,18 @@ class CSVFileListCreate(ListCreateAPIView):
                 'success': False,
                 'error': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
+
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            csv_file = CSVFile.objects.get(task_id=kwargs['task_id'])
+            rows = CSVRow.objects.filter(csv_file=csv_file).order_by('row_number')
+            
+            return Response({
+                'columns': csv_file.columns,
+                'data': [row.data for row in rows]
+            })
+        except CSVFile.DoesNotExist:
+            return Response({'error': 'File not found'}, status=404)
 
 def home(request):
     files = CSVFile.objects.all().order_by('-uploaded_at')
