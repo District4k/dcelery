@@ -1,12 +1,12 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .models import CSVFile, CSVRow
+from cworker.models import CSVFile, CSVRow
 from .serializers import CSVFileSerializer
 import pandas as pd
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework import generics
+from rest_framework.generics import ListCreateAPIView
 from celery.result import AsyncResult
 from django.conf import settings
 from celery import Celery
@@ -14,31 +14,42 @@ from cworker.tasks import process_csv_file
 
 class TaskStatusView(APIView):
     def get(self, request, task_id):
-        result = AsyncResult(task_id)
-        response_data = {
-            'task_id': task_id,
-            'status': result.status,
-        }
-
-        if result.status == 'SUCCESS':
-            task_meta = result._get_task_meta()
-            csv_file_id = task_meta.get('kwargs', {}).get('csv_file_id')
-
-            if csv_file_id:
-                csv_file = CSVFile.objects.get(id=csv_file_id)
-                rows = csv_file.rows.all()  # Using related_name
-                response_data['data'] = {
-                    'columns': csv_file.columns,
-                    'rows': [row.data for row in rows]
+        task_result = AsyncResult(task_id)
+        
+        try:
+            # Find the CSV file associated with this task
+            csv_file = CSVFile.objects.get(task_id=task_id)
+            
+            response_data = {
+                'task_id': task_id,
+                'status': task_result.status,
+                'file_status': csv_file.status,
+                'progress': {
+                    'total_rows': csv_file.total_rows,
+                    'processed_rows': csv_file.rows.count() if hasattr(csv_file, 'rows') else 0
                 }
+            }
+            
+            # If task is complete, include the file data
+            if task_result.status == 'SUCCESS':
+                response_data['file_id'] = csv_file.id
+                # Get all rows for this CSV file
+                rows = CSVRow.objects.filter(csv_file=csv_file).order_by('row_number')
+                response_data['data'] = {
+                    'rows': [row.data for row in rows],
+                    'columns': csv_file.columns
+                }
+                
+            return Response(response_data)
+            
+        except CSVFile.DoesNotExist:
+            return Response({
+                'status': 'ERROR',
+                'message': 'CSV file not found'
+            }, status=404)
 
-        elif result.status == 'FAILURE':
-            response_data['error'] = str(result.result)
 
-        return Response(response_data, status=status.HTTP_200_OK)
-
-
-class CSVFileListCreate(generics.ListCreateAPIView):
+class CSVFileListCreate(ListCreateAPIView):
     queryset = CSVFile.objects.all()
     serializer_class = CSVFileSerializer
 

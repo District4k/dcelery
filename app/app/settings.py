@@ -51,11 +51,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'app',
-    'cworker',
-    'pandas',
     'rest_framework',
     'corsheaders',
+    'cworker.apps.CworkerConfig',
+    'app',
 ]
 
 MIDDLEWARE = [
