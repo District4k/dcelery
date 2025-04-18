@@ -10,4 +10,7 @@ urlpatterns = [
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/csv/', views.CSVFileListCreate.as_view(), name='csv-list-create'),
     path('api/task-status/<str:task_id>/', views.TaskStatusView.as_view(), name='task-status'),
+    path('api/csv/upload/', views.CSVFileListCreate.as_view(), name='csv-upload'),
+    path('api/csv/<str:task_id>/', views.CSVFileListCreate.as_view(), name='csv-detail'),
+    path('api/csv/<str:task_id>/status/', views.TaskStatusView.as_view(), name='task-status'),
 ]
