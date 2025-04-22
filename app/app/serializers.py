@@ -1,13 +1,7 @@
 from rest_framework import serializers
-from cworker.models import CSVFile, CSVRow
-
-class CSVRowSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CSVRow
-        fields = ['row_number', 'data']
+from cworker.models import CSVFile
 
 class CSVFileSerializer(serializers.ModelSerializer):
-    rows = CSVRowSerializer(many=True, read_only=True)
 
     class Meta:
         model = CSVFile

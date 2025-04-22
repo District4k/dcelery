@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from cworker.models import CSVFile, CSVRow
+from cworker.models import CSVFile
 from .serializers import CSVFileSerializer
 import pandas as pd
 from rest_framework.views import APIView
@@ -34,7 +34,7 @@ class TaskStatusView(APIView):
             if task_result.status == 'SUCCESS':
                 response_data['file_id'] = csv_file.id
                 # Get all rows for this CSV file
-                rows = CSVRow.objects.filter(csv_file=csv_file).order_by('row_number')
+                rows = CSVFile.objects.filter(csv_file=csv_file).order_by('row_number')
                 response_data['data'] = {
                     'rows': [row.data for row in rows],
                     'columns': csv_file.columns
@@ -99,7 +99,7 @@ class CSVFileListCreate(ListCreateAPIView):
     def retrieve(self, request, *args, **kwargs):
         try:
             csv_file = CSVFile.objects.get(task_id=kwargs['task_id'])
-            rows = CSVRow.objects.filter(csv_file=csv_file).order_by('row_number')
+            rows = CSVFile.objects.filter(csv_file=csv_file).order_by('row_number')
             
             return Response({
                 'columns': csv_file.columns,
