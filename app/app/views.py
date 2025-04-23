@@ -1,14 +1,14 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.parsels import MultiPartParsel
+from rest_framework.parsers import MultiPartParser
 from rest_framework import status
-from .tasks import process_csv_file
+from cworker.tasks import process_csv_file
 import tempfile
 from celery.result import AsyncResult
 from django.conf import settings
 
 class CSVUploadView(APIView):
-    parser_classes = [MultiPartParsel]
+    parser_classes = [MultiPartParser]
 
     def post(self, request, *args,**kwargs):
         uploaded_file = request.FILES.get('file')
