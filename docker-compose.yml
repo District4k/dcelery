@@ -10,6 +10,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./app:/usr/src/app/
+      - /uploads:/app/uploads
     ports:
       - "8001:8000"
     depends_on:
@@ -23,7 +24,23 @@ services:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
       - REDIS_URL=redis://redis:6379/0
-
+  react:
+    container_name: react
+    build:
+      context: ./my-frontend
+    volumes:
+      - ./my-frontend:/app
+      - /my-frontend/node_modules
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_API_URL=http://localhost:8001/
+      - CHOKIDAR_USEPOLLING=true
+      - WDS_SOCKET_HOST=localhost
+      - GENERATE_SOURCEMAP=true
+    depends_on:
+      - django
   celery:
     container_name: celery
     build:
@@ -31,6 +48,7 @@ services:
     command: celery --app=app worker -l INFO
     volumes:
       - ./app:/usr/src/app/
+      - /uploads:/app/uploads
     depends_on:
       - db
       - redis

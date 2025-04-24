@@ -8,10 +8,17 @@ click-didyoumean==0.3.1
 click-plugins==1.1.1
 click-repl==0.3.0
 Django==5.2
+django-cors-headers==4.7.0
+djangorestframework==3.16.0
+djangorestframework_simplejwt==5.5.0
 kombu==5.5.2
+numpy==2.2.4
+pandas==2.2.3
 prompt_toolkit==3.0.50
 psycopg2-binary==2.9.10
+PyJWT==2.9.0
 python-dateutil==2.9.0.post0
+pytz==2025.2
 redis==5.2.1
 six==1.17.0
 sqlparse==0.5.3
