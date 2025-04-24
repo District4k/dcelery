@@ -96,6 +96,7 @@ function TaskStatusChecker({ taskId }) {
           {record && (
             <div className="text-sm text-gray-800 mt-2">
               <p>Record ID: <strong>{record.id}</strong></p>
+              <p>CSV Name: <strong>{record.name || "Unnamed"}</strong></p>
               <p>CSV Type: <strong>{record.csv_type}</strong></p>
               <p>Rows Saved: <strong>{record.rows}</strong></p>
               <p>Uploaded At: <strong>{record.uploaded_at}</strong></p>

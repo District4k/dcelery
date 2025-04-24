@@ -22,6 +22,7 @@ class CSVUploadView(APIView):
     def post(self, request, *args, **kwargs):
         uploaded_file = request.FILES.get("file")
         csv_type = request.data.get("csv_type", "generic")
+        csv_name = request.data.get("csv_name")  # Get the CSV name from form data
 
         if not uploaded_file:
             logger.error("No file provided in request.")
@@ -33,6 +34,13 @@ class CSVUploadView(APIView):
             logger.error(f"Invalid file type: {uploaded_file.name}")
             return Response(
                 {"error": "Invalid file type. Please upload a CSV file."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if not csv_name:
+            logger.error("No CSV name provided.")
+            return Response(
+                {"error": "Please provide a name for the CSV."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -59,8 +67,8 @@ class CSVUploadView(APIView):
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
 
-            # Start Celery task
-            task = process_csv_file.delay(file_path, csv_type)
+            # Start Celery task with csv_name
+            task = process_csv_file.delay(file_path, csv_type, csv_name)
             logger.info(f"Started Celery task: {task.id}")
             return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
 
@@ -90,6 +98,7 @@ class TaskStatusView(APIView):
                         response_data["record"] = {
                             "id": record.id,
                             "csv_type": record.csv_type,
+                            "name": record.name,  # Include csv_name
                             "rows": len(record.data) if record else 0,
                             "uploaded_at": record.uploaded_at.isoformat() if record else None
                         } if record else None

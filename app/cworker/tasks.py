@@ -8,7 +8,7 @@ from .models import GenericCsvRecord
 logger = logging.getLogger(__name__)
 
 @shared_task
-def process_csv_file(file_path, csv_type="generic"):
+def process_csv_file(file_path, csv_type="generic", csv_name=None):
     try:
         logger.info(f"Attempting to access file: {file_path}")
         if not os.path.exists(file_path):
@@ -25,10 +25,11 @@ def process_csv_file(file_path, csv_type="generic"):
 
             logger.info(f"Processed CSV data: {len(data)} rows")
 
-            # Save to database
+            # Save to database with csv_name
             record = GenericCsvRecord.objects.create(
                 task_id=process_csv_file.request.id,
                 csv_type=csv_type,
+                name=csv_name,  # Store the user-provided name
                 data=data
             )
             logger.info(f"Saved record to database: {record}")
@@ -38,6 +39,7 @@ def process_csv_file(file_path, csv_type="generic"):
         return {
             "record_id": record.id,
             "csv_type": csv_type,
+            "csv_name": csv_name,  # Include csv_name in response
             "rows_saved": len(data),
             "error": None,
             "task_id": process_csv_file.request.id
@@ -49,6 +51,7 @@ def process_csv_file(file_path, csv_type="generic"):
         return {
             "record_id": None,
             "csv_type": csv_type,
+            "csv_name": csv_name,
             "rows_saved": 0,
             "error": str(e),
             "task_id": process_csv_file.request.id
@@ -59,6 +62,7 @@ def process_csv_file(file_path, csv_type="generic"):
         return {
             "record_id": None,
             "csv_type": csv_type,
+            "csv_name": csv_name,
             "rows_saved": 0,
             "error": str(e),
             "task_id": process_csv_file.request.id

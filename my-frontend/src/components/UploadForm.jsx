@@ -4,6 +4,7 @@ import api from "../api";
 
 function UploadForm({ onUploadSuccess }) {
   const [file, setFile] = useState(null);
+  const [csvName, setCsvName] = useState(""); // New state for CSV name
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -18,10 +19,18 @@ function UploadForm({ onUploadSuccess }) {
     setFile(selectedFile);
   };
 
+  const handleNameChange = (e) => {
+    setCsvName(e.target.value);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!file) {
       setError("No file selected.");
+      return;
+    }
+    if (!csvName.trim()) {
+      setError("Please provide a name for the CSV.");
       return;
     }
 
@@ -29,6 +38,7 @@ function UploadForm({ onUploadSuccess }) {
     setError(null);
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("csv_name", csvName); // Add CSV name to form data
 
     try {
       const res = await api.post("/api/upload/", formData, {
@@ -36,6 +46,7 @@ function UploadForm({ onUploadSuccess }) {
       });
       onUploadSuccess(res.data.task_id);
       setFile(null);
+      setCsvName(""); // Reset name input
       e.target.reset();
     } catch (err) {
       setError(
@@ -48,6 +59,20 @@ function UploadForm({ onUploadSuccess }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6" aria-label="CSV Upload Form">
+      <div>
+        <label htmlFor="csv-name" className="block text-sm font-medium text-gray-700">
+          CSV Name
+        </label>
+        <input
+          id="csv-name"
+          type="text"
+          value={csvName}
+          onChange={handleNameChange}
+          placeholder="Enter a name for this CSV"
+          className="block w-full p-3 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          disabled={uploading}
+        />
+      </div>
       <div>
         <label htmlFor="file-upload" className="block text-sm font-medium text-gray-700">
           Upload CSV File
@@ -69,7 +94,7 @@ function UploadForm({ onUploadSuccess }) {
       </div>
       <button
         type="submit"
-        disabled={uploading || !file}
+        disabled={uploading || !file || !csvName.trim()}
         className="w-full py-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-50 flex items-center justify-center"
         aria-busy={uploading}
       >
