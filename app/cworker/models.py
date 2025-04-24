@@ -2,9 +2,9 @@
 from django.db import models
 
 class GenericCsvRecord(models.Model):
-    task_id = models.CharField(max_length=36, null=True, blank=True)  # Celery task ID
+    task_id = models.CharField(max_length=36, null=True, blank=True)
     csv_type = models.CharField(max_length=100)
-    name = models.CharField(max_length=255, null=True, blank=True)  # New field for user-provided name
+    name = models.CharField(max_length=255, null=True, blank=True)
     data = models.JSONField()
     uploaded_at = models.DateTimeField(auto_now_add=True)
 

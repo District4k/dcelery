@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from "react";
 import CsvUploader from "./components/CsvUploader";
 import { ErrorBoundary } from "react-error-boundary";

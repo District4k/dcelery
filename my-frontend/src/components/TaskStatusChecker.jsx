@@ -1,4 +1,3 @@
-// src/components/TaskStatusChecker.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import api from "../api";
 
@@ -24,11 +23,11 @@ function TaskStatusChecker({ taskId }) {
         // Trigger cleanup
         await api.post(`/api/task/${taskId}/`);
       }
-      console.log(`Task ${taskId} status:`, res.data); // Debug log
+      console.log(`Task ${taskId} status:`, res.data);
     } catch (err) {
       const errorMsg = err.response?.data?.error || "Failed to fetch task status.";
       setError(errorMsg);
-      console.error(`Task ${taskId} error:`, err); // Debug log
+      console.error(`Task ${taskId} error:`, err);
     } finally {
       setLoading(false);
     }

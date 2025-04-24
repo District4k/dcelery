@@ -1,4 +1,3 @@
-# cworker/tasks.py
 from celery import shared_task
 import csv
 import os
@@ -18,28 +17,26 @@ def process_csv_file(file_path, csv_type="generic", csv_name=None):
         with open(file_path, newline='', encoding='utf-8') as csvfile:
             logger.info(f"Opened file: {file_path}")
             reader = csv.reader(csvfile)
-            data = [row for row in reader]  # Read all rows, including header
+            data = [row for row in reader]
             if not data:
                 logger.error("Empty CSV file")
                 raise ValueError("CSV file is empty")
 
             logger.info(f"Processed CSV data: {len(data)} rows")
 
-            # Save to database with csv_name
             record = GenericCsvRecord.objects.create(
                 task_id=process_csv_file.request.id,
                 csv_type=csv_type,
-                name=csv_name,  # Store the user-provided name
+                name=csv_name,
                 data=data
             )
             logger.info(f"Saved record to database: {record}")
 
-        # Store file_path in task metadata for cleanup
         process_csv_file.update_state(state='SUCCESS', meta={'file_path': file_path})
         return {
             "record_id": record.id,
             "csv_type": csv_type,
-            "csv_name": csv_name,  # Include csv_name in response
+            "csv_name": csv_name,
             "rows_saved": len(data),
             "error": None,
             "task_id": process_csv_file.request.id

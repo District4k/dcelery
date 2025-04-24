@@ -1,10 +1,9 @@
-// src/components/UploadForm.jsx
 import React, { useState } from "react";
 import api from "../api";
 
 function UploadForm({ onUploadSuccess }) {
   const [file, setFile] = useState(null);
-  const [csvName, setCsvName] = useState(""); // New state for CSV name
+  const [csvName, setCsvName] = useState("");
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -38,7 +37,7 @@ function UploadForm({ onUploadSuccess }) {
     setError(null);
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("csv_name", csvName); // Add CSV name to form data
+    formData.append("csv_name", csvName);
 
     try {
       const res = await api.post("/api/upload/", formData, {
@@ -46,7 +45,7 @@ function UploadForm({ onUploadSuccess }) {
       });
       onUploadSuccess(res.data.task_id);
       setFile(null);
-      setCsvName(""); // Reset name input
+      setCsvName("");
       e.target.reset();
     } catch (err) {
       setError(
