@@ -4,7 +4,6 @@ import api from "../api";
 
 function TaskStatusChecker({ taskId }) {
   const [status, setStatus] = useState("");
-  const [result, setResult] = useState(null);
   const [record, setRecord] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -18,7 +17,6 @@ function TaskStatusChecker({ taskId }) {
     try {
       const res = await api.get(`/api/task/${taskId}/`);
       setStatus(res.data.status);
-      setResult(res.data.result || null);
       setRecord(res.data.record || null);
       setError(res.data.error || null);
       if (["SUCCESS", "FAILURE"].includes(res.data.status)) {
@@ -91,11 +89,6 @@ function TaskStatusChecker({ taskId }) {
               <p>Rows Saved: <strong>{record.rows}</strong></p>
               <p>Uploaded At: <strong>{record.uploaded_at}</strong></p>
             </div>
-          )}
-          {result && (
-            <p className="text-sm text-gray-800 mt-2">
-              Result: <strong>{JSON.stringify(result)}</strong>
-            </p>
           )}
           {error && (
             <p className="text-sm text-red-600 mt-2" role="alert">
