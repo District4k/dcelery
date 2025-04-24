@@ -53,46 +53,36 @@ function TaskStatusChecker({ taskId }) {
 
   return (
     <div className="mt-6 space-y-4" aria-live="polite">
-      <button
-        onClick={() => setPolling(true)}
-        disabled={loading || !taskId}
-        className="w-full py-3 bg-green-600 text-white font-semibold rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 disabled:opacity-50 flex items-center justify-center"
-        aria-busy={loading}
-        aria-label="Check task status"
-      >
-        {loading ? (
-          <>
-            <svg
-              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              />
-            </svg>
-            Checking Status...
-          </>
-        ) : (
-          polling ? "Checking Status..." : "Check Task Status"
-        )}
-      </button>
       {status && (
         <div className="p-4 bg-gray-100 rounded-md">
           <p className="text-sm text-gray-800">
             Status: <strong>{status}</strong>
           </p>
+          {loading && (
+            <p className="text-sm text-gray-600 mt-2 flex items-center">
+              <svg
+                className="animate-spin -ml-1 mr-2 h-5 w-5 text-gray-600"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
+              </svg>
+              Checking Status...
+            </p>
+          )}
           {record && (
             <div className="text-sm text-gray-800 mt-2">
               <p>Record ID: <strong>{record.id}</strong></p>
