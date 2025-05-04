@@ -46,6 +46,7 @@ This project is a full-stack solution for uploading and processing large CSV fil
 ├── docker-compose.yml
 ├── .env (optional)
 ├── command.me          # CLI command shortcuts or notes
+└── .env.example
 └── ...
 ```
 
@@ -95,29 +96,31 @@ docker-compose up --build
 
 ## 🔐 Environment Variables
 
-You **do not need a separate `.env` file** — all environment variables can be **set or changed directly in `docker-compose.yml`** under the `environment:` section for each service.
+You **must use a `.env` file** to configure environment variables. All services in `docker-compose.yml` are set up to load this file via the `env_file:` directive.
 
-#### Example (`docker-compose.yml`):
+Create a `.env` file in the root of your project with variables like:
 
-```yaml
-services:
-  db:
-    image: postgres
-    environment:
-      - POSTGRES_DB=mydb
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+```env
+# Django/Celery settings
+DEBUG=1
+SECRET_KEY=your-secret-key-here
+ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
 
-  backend:
-    environment:
-      - CELERY_BROKER=redis://redis:6379/0
-```
+# Postgres settings
+POSTGRES_DB=your-db-name
+POSTGRES_USER=your-db-user
+POSTGRES_PASSWORD=your-db-password
 
-You can customize:
+# Redis settings
+REDIS_URL=redis://redis:6379/0
+CELERY_RESULT_BACKEND=redis://redis:6379/0
 
-- PostgreSQL database name, username, password
-- Celery broker URL
-- Django secret keys, debug flags, etc.
+# React settings
+NODE_ENV=development
+REACT_APP_API_URL=http://localhost:8001/
+CHOKIDAR_USEPOLLING=true
+WDS_SOCKET_HOST=localhost
+GENERATE_SOURCEMAP=true
 
 ---
 
