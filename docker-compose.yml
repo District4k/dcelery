@@ -1,7 +1,19 @@
 services:
-
   redis:
-    image: redis:8.0-rc1-alpine
+    image: redis:7-alpine
+
+  db:
+    image: postgres:latest
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   django:
     container_name: django
@@ -10,37 +22,39 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./app:/usr/src/app/
-      - /uploads:/app/uploads
+      - ./uploads:/app/uploads
     ports:
       - "8001:8000"
     depends_on:
       - db
       - redis
     environment:
-      - DEBUG=1
-      - SECRET_KEY=rugb3rg734yg3487hfw8f6843gf24hg92g
-      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
-      - POSTGRES_DB=db
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - REDIS_URL=redis://redis:6379/0
+      - DEBUG=${DEBUG}
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_URL=${REDIS_URL}
+
   react:
     container_name: react
     build:
       context: ./my-frontend
     volumes:
       - ./my-frontend:/app
-      - /my-frontend/node_modules
+      - react_node_modules:/app/node_modules
     ports:
       - "3001:3000"
     environment:
-      - NODE_ENV=development
-      - REACT_APP_API_URL=http://localhost:8001/
-      - CHOKIDAR_USEPOLLING=true
-      - WDS_SOCKET_HOST=localhost
-      - GENERATE_SOURCEMAP=true
+      - NODE_ENV=${NODE_ENV}
+      - REACT_APP_API_URL=${REACT_APP_API_URL}
+      - CHOKIDAR_USEPOLLING=${CHOKIDAR_USEPOLLING}
+      - WDS_SOCKET_HOST=${WDS_SOCKET_HOST}
+      - GENERATE_SOURCEMAP=${GENERATE_SOURCEMAP}
     depends_on:
       - django
+
   celery:
     container_name: celery
     build:
@@ -48,32 +62,20 @@ services:
     command: celery --app=app worker -l INFO
     volumes:
       - ./app:/usr/src/app/
-      - /uploads:/app/uploads
+      - ./uploads:/app/uploads
     depends_on:
       - db
       - redis
     environment:
-      - DEBUG=1
-      - SECRET_KEY=rugb3rg734yg3487hfw8f6843gf24hg92g
-      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
-      - POSTGRES_DB=db
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-      - REDIS_URL=redis://redis:6379/0
-      - CELEERY_BACKEND=redis://redis:6379/0
-
-  db:
-    image: postgres:latest
-    container_name: db
-    restart: always
-    environment:
-      POSTGRES_DB: db
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5433:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - DEBUG=${DEBUG}
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - REDIS_URL=${REDIS_URL}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
 
 volumes:
   postgres_data:
+  react_node_modules:
